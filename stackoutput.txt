@@ -1,0 +1,59 @@
+1 pushed onto the stack.
+2 pushed onto the stack.
+3 pushed onto the stack.
+4 pushed onto the stack.
+5 pushed onto the stack.
+6 pushed onto the stack.
+7 pushed onto the stack.
+8 pushed onto the stack.
+9 pushed onto the stack.
+10 pushed onto the stack.
+
+Current element on top of stack: 10
+10 popped off stack. 
+
+Current stack: 
+9
+8
+7
+6
+5
+4
+3
+2
+1
+
+Current element on top of stack: 9
+
+11 pushed onto the stack.
+
+12 pushed onto the stack.
+
+Current element on top of stack: 12
+
+Current stack: 
+12
+11
+9
+8
+7
+6
+5
+4
+3
+2
+1
+
+12 popped off stack. 
+
+Current stack: 
+11
+9
+8
+7
+6
+5
+4
+3
+2
+1
