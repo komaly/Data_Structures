@@ -8,184 +8,163 @@
 #include <inttypes.h>
 #include <string.h>
 
+#define WORDLENGTH 64
+
 typedef struct Graph
 {
 	uint64_t* adjacencyMatrix;
+	uint64_t* nodeSet;
 	int nodeCount;
-	int* nodeSet;
-}Graph;
+	int size;
+} Graph;
 
-void addNode(Graph* G, int* size, int element)
+static inline uint64_t setBit(uint64_t* element, int pos)
 {
-	if (G->nodeCount >= *size)
-	{
-		*size = *size * 2;
-		int* temp = (int*) malloc(*size * sizeof(int));
-		
-		if (temp == NULL)
-		{
-			fprintf(stderr, "%s\n", "Not enough memory to add more nodes.");
-			free(G->nodeSet);
-			exit(-1);
-		}
-
-		for (int i = 0; i < G->nodeCount; i++)
-			temp[i] = G->nodeSet[i];
-
-		free(G->nodeSet);
-		G->nodeSet = temp;
-	}
-
-
-	G->nodeSet[G->nodeCount++] = element;
+	*element |= (1ULL << pos);
+	return *element;
 }
 
-int getIndexOfNode(Graph* G, int element)
+static inline uint64_t unsetBit(uint64_t* element, int pos)
 {
-	for (int i = 0; i < G->nodeCount; i++)
-	{
-		if (G->nodeSet[i] == element)
-			return i;
-	}
-
-	return -1;
+	*element &= ~(1ULL << pos);
+	return *element;
 }
 
-void deleteNode(Graph* G, int size, int element)
+static inline uint64_t checkBit(uint64_t element, int pos)
 {
-	int index = getIndexOfNode(G, element);
+	return element & (1ULL << pos); //if 0, its not set, else, set
+}
 
-	if (index == -1)
+void addNode(Graph* G, int element)
+{
+	if (element < 0)
 	{
-		fprintf(stderr, "%s\n", "Element to delete not found.");
+		fprintf(stderr, "%s\n", "Node must be an integer greater than 0.");
 		exit(-1);
 	}
 
-	int* temp = (int*) malloc(size * sizeof(int));
+	int nodeSetIndex = element / G->size;
+	int bitNum = element & 63;
 
-	for (int j = 0; j < index; j++)
-		temp[j] = G->nodeSet[j];
+	if (checkBit(G->nodeSet[nodeSetIndex], bitNum) != 0)
+	{
+		fprintf(stderr, "%s\n", "Node is already in the graph.");
+		exit(-1);
+	}
 
-	for (int k = index; k < G->nodeCount; k++)
-		temp[k] = G->nodeSet[k+1];
+	if (nodeSetIndex > G->size - 1)
+	{
+		//make nodeset bigger 
+	}
+
+	setBit(&(G->nodeSet[nodeSetIndex]), bitNum);
+	G->nodeCount++;
+}
+
+void deleteNode(Graph* G, int element)
+{
+	int nodeSetIndex = element / G->size;
+	int bitNum = element & 63;
+
+	if (checkBit(G->nodeSet[nodeSetIndex], bitNum) == 0)
+	{
+		fprintf(stderr, "%s\n", "Node is not in the graph.");
+		exit(-1);
+	}
+
+	unsetBit(&(G->nodeSet[nodeSetIndex]), bitNum);
+
+	//delete edges associated with node
 
 	G->nodeCount--;
-
-	free(G->nodeSet);
-	G->nodeSet = temp;
-	//delete edges associated with node
 }
 
-int checkBit(int element, int pos)
+void addEdge(Graph* G, int rowElement, int colElement)
 {
-	return element & (1 << pos); //if 0, not set, else, set
-}
+	int wordsPerRow = G->size / WORDLENGTH;
+	int bit = colElement / WORDLENGTH;
 
-void addEdge(Graph* G, int element1, int element2)
-{
-	//get indexes of element1 and 2
-	//at index of element1 in matrix, change bit #element2 index
-	//at index of element2 in matrix, change bit #element1 index
-	int element1Index = getIndexOfNode(G, element1);
-	int element2Index = getIndexOfNode(G, element2);
-
-	if (element1Index == -1 || element2Index == -1)
-	{
-		fprintf(stderr, "%s\n", "Node to add edge not found.");
-		exit(-1);
-	}
-
-	//if bit not set, set it
-	if (checkBit(G->adjacencyMatrix[element1Index], element2Index) == 0)
-	{
-		G->adjacencyMatrix[element1Index] = G->adjacencyMatrix[element1Index] ^ (1 << element2Index);
-		G->adjacencyMatrix[element2Index] = G->adjacencyMatrix[element2Index] ^ (1 << element1Index);
-	}
-
-	else
+	if (checkBit(G->adjacencyMatrix[(rowElement * wordsPerRow) + bit], bit) != 0)
 	{
 		fprintf(stderr, "%s\n", "There is already an edge between these 2 nodes.");
-		exit(-1);
+	 	exit(-1);
 	}
+
+	setBit(&(G->adjacencyMatrix[(rowElement * wordsPerRow) + bit]), bit);
 
 }
 
 void deleteEdge(Graph* G, int element1, int element2)
 {
-	int element1Index = getIndexOfNode(G, element1);
-	int element2Index = getIndexOfNode(G, element2);
+	int wordsPerRow = G->size / WORDLENGTH;
+	int bit = colElement / WORDLENGTH;
 
-	if (element1Index == -1 || element2Index == -1)
+	if (checkBit(G->adjacencyMatrix[(rowElement * wordsPerRow) + bit], bit) == 0)
 	{
-		fprintf(stderr, "%s\n", "Node to remove edge not found.");
-		exit(-1);
+		fprintf(stderr, "%s\n", "There is already no edge between these 2 nodes.");
+	 	exit(-1);
 	}
 
-	if (checkBit(G->adjacencyMatrix[element1Index], element2Index) != 0)
-	{
-		G->adjacencyMatrix[element1Index] = G->adjacencyMatrix[element1Index] ^ (1 << element2Index);
-		G->adjacencyMatrix[element2Index] = G->adjacencyMatrix[element2Index] ^ (1 << element1Index);
-	}
-
-	else
-	{
-		fprintf(stderr, "%s\n", "There is no edge between these 2 nodes.");
-		exit(-1);
-	}
+	unsetBit(&(G->adjacencyMatrix[(rowElement * wordsPerRow) + bit]), bit);
 	
 }
 
-void printNodeSet(Graph* G)
+void printNodeSetVal(Graph* G, int element)
 {
 	printf("NodeSet:\n");
-	for (int i = 0; i < G->nodeCount; i++)
-	{
-		printf("%d\n", G->nodeSet[i]);
-	}
+	
+	int a = element / G->size;
+	printf("%llu\n", G->nodeSet[a]);
+
 }
 
 void printAdjacencyMatrixVal(Graph* G, int element)
 {
-	printf("Adjacency Matrix: \n");
-	for (int i = 0; i < 64; i++)
-	{
-		if (G->nodeSet[i] == element)
-			printf("%" PRIu64 "\n", G->adjacencyMatrix[i]);
-	}
+	// printf("Adjacency Matrix: \n");
+	// for (int i = 0; i < 64; i++)
+	// {
+	// 	if (G->nodeSet[i] == element)
+	// 		printf("%" PRIu64 "\n", G->adjacencyMatrix[i]);
+	// }
 }
 
 int main(void)
 {
 	struct Graph G;
-	int size = 64;
-	G.adjacencyMatrix = (uint64_t*) malloc(size * sizeof(uint64_t));
-	memset(G.adjacencyMatrix, 0, size * sizeof(uint64_t));
-
+	G.adjacencyMatrix = (uint64_t*) malloc(G.size * sizeof(uint64_t));
+	G.nodeSet = (uint64_t*) malloc(G.size * sizeof(uint64_t));
 	G.nodeCount = 0;
-	G.nodeSet = (int*) malloc(size * sizeof(int));
+	G.size = 64;
+	
+	memset(G.adjacencyMatrix, 0, G.size * sizeof(uint64_t));
+	memset(G.nodeSet, 0, G.size * sizeof(uint64_t));
 
-	//printAdjacencyMatrix(&G);
-	addNode(&G, &size, 35);
-	addNode(&G, &size, 36);
-	addNode(&G, &size, 37);
-	addNode(&G, &size, 39);
-	addNode(&G, &size, 43);
-	printf("NODE COUNT %d\n", G.nodeCount);
-	printNodeSet(&G);
-	deleteNode(&G, size, 43);
-	printf("NODE COUNT %d\n", G.nodeCount);
-	printNodeSet(&G);
-	addEdge(&G, 36, 37);
-	printAdjacencyMatrixVal(&G, 36);
-	printAdjacencyMatrixVal(&G, 37);
-	printAdjacencyMatrixVal(&G, 39);
-	addEdge(&G, 36, 39);
-	printAdjacencyMatrixVal(&G, 36);
-	printAdjacencyMatrixVal(&G, 37);
-	printAdjacencyMatrixVal(&G, 39);
-	deleteEdge(&G, 36, 39);
-	printAdjacencyMatrixVal(&G, 36);
-	printAdjacencyMatrixVal(&G, 37);
-	printAdjacencyMatrixVal(&G, 39);
-	deleteEdge(&G, 36, 39);
+	addNode(&G, 3);
+	addNode(&G, 30);
+	addNode(&G, 33);
+	printNodeSetVal(&G, 36);
+	
+	deleteNode(&G, 33);
+	printNodeSetVal(&G, 33);
+	// addNode(&G, &size, 37);
+	// addNode(&G, &size, 39);
+	// addNode(&G, &size, 43);
+	// printf("NODE COUNT %d\n", G.nodeCount);
+	// printNodeSet(&G);
+	// deleteNode(&G, size, 43);
+	// printf("NODE COUNT %d\n", G.nodeCount);
+	// printNodeSet(&G);
+	// addEdge(&G, 36, 37);
+	// printAdjacencyMatrixVal(&G, 36);
+	// printAdjacencyMatrixVal(&G, 37);
+	// printAdjacencyMatrixVal(&G, 39);
+	// addEdge(&G, 36, 39);
+	// printAdjacencyMatrixVal(&G, 36);
+	// printAdjacencyMatrixVal(&G, 37);
+	// printAdjacencyMatrixVal(&G, 39);
+	// deleteEdge(&G, 36, 39);
+	// printAdjacencyMatrixVal(&G, 36);
+	// printAdjacencyMatrixVal(&G, 37);
+	// printAdjacencyMatrixVal(&G, 39);
+	// deleteEdge(&G, 36, 39);
 }
