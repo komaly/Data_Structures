@@ -10,7 +10,7 @@
 // Returns true if the queue is full
 bool isFull(int* end, int* physical_size)
 {
-	return *end > *physical_size;
+	return *end >= *physical_size;
 }
 
 // Returns true if the queue is empty
@@ -24,24 +24,8 @@ int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 {
 	if (isFull(end, physical_size))
 	{
-		*physical_size = *physical_size * 2;
-		int* temp = (int*) malloc(*physical_size * sizeof(int));
-		
-		if (temp == NULL)
-		{
-			fprintf(stderr, "%s\n", "Not enough memory to reallocate queue.");
-			free(queue);
-			exit(-1);
-		}
-
-		for (int i = *start; i < *end - 1; i++)
-		{
-			temp[i] = queue[i];
-			printf("%d\n", queue[i]);
-		}
-
-		free(queue);
-		queue = temp;
+		*physical_size *=  2;
+		queue = (int*) realloc(queue, *physical_size * sizeof(int));
 	}
 
 	queue[(*end)++] = element;
