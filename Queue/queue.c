@@ -7,16 +7,19 @@
 #include <stdbool.h>
 #include <string.h>
 
+// Returns true if the queue is full
 bool isFull(int* end, int* physical_size)
 {
 	return *end > *physical_size;
 }
 
+// Returns true if the queue is empty
 bool isEmpty(int* queue, int* start, int* end)
 {
 	return *start == *end;
 }
 
+// Adds an element to the end of the queue
 int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 {
 	if (isFull(end, physical_size))
@@ -37,17 +40,15 @@ int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 			printf("%d\n", queue[i]);
 		}
 
-		//printf("HII\n");
 		free(queue);
-		//printf("HELOO\n");
 		queue = temp;
-		//printf("WOOO\n"); 
 	}
 
 	queue[(*end)++] = element;
 	return element;
 }
 
+// Removes the element at the front of the queue 
 int dequeue(int* queue, int* start, int* end)
 {
 	if (isEmpty(queue, start, end))
@@ -60,11 +61,13 @@ int dequeue(int* queue, int* start, int* end)
 	return queue[(*start)++];
 }
 
+// Returns the element at the front of the queue
 int peek(int* queue, int* start)
 {
 	return queue[*start];
 }
 
+// Prints the queue
 void printQueue(int* queue, int start, int end)
 {
 	printf("\n%s\n", "Current queue: ");
@@ -76,6 +79,10 @@ void printQueue(int* queue, int start, int end)
 	printf("\n");
 }
 
+// Initializes the physical size of the queue, the queue itself,
+// a variable indicating the current index of the start of the queue,
+// and a variable indicating the current index of the end of the queue.
+// Elements are enqueued, dequeued, and peeked on the queue.
 int main(int argc, char const *argv[])
 {
 	int physical_size = 10;
@@ -90,7 +97,7 @@ int main(int argc, char const *argv[])
 		exit(-1);
 	}
 
-	for (int i = 1; i < 10; i++)
+	for (int i = 1; i < 13; i++)
 	{
 		enqueue(queue, &physical_size, &start, &end, i);
 	}
