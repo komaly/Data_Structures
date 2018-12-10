@@ -23,8 +23,6 @@ int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 	{
 		*physical_size = *physical_size * 2;
 		int* temp = (int*) malloc(*physical_size * sizeof(int));
-
-		memcpy(temp, queue, strlen(queue) + 1);
 		
 		if (temp == NULL)
 		{
@@ -39,11 +37,11 @@ int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 			printf("%d\n", queue[i]);
 		}
 
-		//printf("HII\n");
+		printf("HII\n");
 		free(queue);
-		//printf("HELOO\n");
+		printf("HELOO\n");
 		queue = temp;
-		//printf("WAHH\n"); 
+		printf("WAHH\n"); 
 	}
 
 	queue[(*end)++] = element;
@@ -92,18 +90,18 @@ int main(int argc, char const *argv[])
 		exit(-1);
 	}
 
-	for (int i = 1; i < 13; i++)
+	for (int i = 1; i < 10; i++)
 	{
 		enqueue(queue, &physical_size, &start, &end, i);
 	}
 
-	// printQueue(queue, start, end);
+	printQueue(queue, start, end);
 
-	// dequeue(queue, &start, &end);
-	// dequeue(queue, &start, &end);
-	// dequeue(queue, &start, &end);
+	dequeue(queue, &start, &end);
+	dequeue(queue, &start, &end);
+	dequeue(queue, &start, &end);
 
-	// printQueue(queue, start, end);
+	printQueue(queue, start, end);
 
-	// printf("%d\n", peek(queue, &start));
+	printf("%d\n", peek(queue, &start));
 }
