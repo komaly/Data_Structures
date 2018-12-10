@@ -4,3 +4,4 @@ Data structures currently implemented:
 
 - Stack
 - Linked List
+- Queue
