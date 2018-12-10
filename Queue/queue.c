@@ -37,11 +37,11 @@ int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
 			printf("%d\n", queue[i]);
 		}
 
-		printf("HII\n");
+		//printf("HII\n");
 		free(queue);
-		printf("HELOO\n");
+		//printf("HELOO\n");
 		queue = temp;
-		printf("WAHH\n"); 
+		//printf("WOOO\n"); 
 	}
 
 	queue[(*end)++] = element;
