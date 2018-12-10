@@ -8,24 +8,10 @@
 //Pushes an element onto the stack
 int push(int* stack, int* top, int* physical_size, int element)
 {
-	if (*top > *physical_size)
+	if (*top >= *physical_size)
 	{
 		*physical_size = *physical_size * 2;
-		int* temp = (int*) malloc(*physical_size * sizeof(int));
-		
-		if (temp == NULL)
-		{
-			fprintf(stderr, "%s\n", "Not enough memory to reallocate stack.");
-			free(stack);
-			exit(-1);
-		}
-
-		for (int i = 0; i < *top; i++)
-			temp[i] = stack[i];
-
-		free(stack);
-
-		stack = temp;
+		stack = (int*) realloc(stack, *physical_size * sizeof(int));
 	}
 
 	stack[(*top)++] = element;
@@ -36,7 +22,10 @@ int push(int* stack, int* top, int* physical_size, int element)
 int pop(int* stack, int* top)
 {
 	if (*top == 0)
-		return *top;
+	{
+		printf("No elements in stack. Nothing popped off.");
+		exit(-1);
+	}
 
 	return stack[--(*top)];
 }
@@ -73,7 +62,7 @@ int main(void)
 		exit(-1);
 	}
 
-	for (int i = 1; i < 11; i++)
+	for (int i = 1; i < 15; i++)
 	{
 		push(stack, &top, &physical_size, i);
 		printf("%d pushed onto the stack.\n", stack[i - 1]);

@@ -8,11 +8,20 @@
 8 pushed onto the stack.
 9 pushed onto the stack.
 10 pushed onto the stack.
+11 pushed onto the stack.
+12 pushed onto the stack.
+13 pushed onto the stack.
+14 pushed onto the stack.
 
-Current element on top of stack: 10
-10 popped off stack. 
+Current element on top of stack: 14
+
+14 popped off stack. 
 
 Current stack: 
+13
+12
+11
+10
 9
 8
 7
@@ -23,7 +32,7 @@ Current stack:
 2
 1
 
-Current element on top of stack: 9
+Current element on top of stack: 13
 
 11 pushed onto the stack.
 
@@ -34,6 +43,10 @@ Current element on top of stack: 12
 Current stack: 
 12
 11
+13
+12
+11
+10
 9
 8
 7
@@ -48,6 +61,10 @@ Current stack:
 
 Current stack: 
 11
+13
+12
+11
+10
 9
 8
 7
