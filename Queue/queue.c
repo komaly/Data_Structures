@@ -7,41 +7,52 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define SIZE 15
+
 // Returns true if the queue is full
-bool isFull(int* end, int* physical_size)
+bool isFull(int *elementCount)
 {
-	return *end >= *physical_size;
+	return *elementCount == SIZE;
 }
 
 // Returns true if the queue is empty
-bool isEmpty(int* queue, int* start, int* end)
+bool isEmpty(int *start, int *end, int *elementCount)
 {
-	return *start == *end;
+	return *start == *end && !isFull(elementCount);
 }
 
-// Adds an element to the end of the queue
-int enqueue(int* queue, int* physical_size, int* start, int* end, int element)
+// Adds an element to the next available space in the queue
+int enqueue(int *queue, int *start, int *end, int *elementCount, int element)
 {
-	if (isFull(end, physical_size))
+	if (isFull(elementCount))
 	{
-		*physical_size *=  2;
-		queue = (int*) realloc(queue, *physical_size * sizeof(int));
+		fprintf(stderr, "%s\n", "Queue is full, cannot enqueue another element.");
+		exit(-1);
 	}
 
-	queue[(*end)++] = element;
+	if (*end < SIZE)
+		queue[(*end)++] = element;
+
+	else
+	{
+		*end = 0;
+		queue[(*end)++] = element;
+	}
+
+	(*elementCount)++;
 	return element;
 }
 
 // Removes the element at the front of the queue 
-int dequeue(int* queue, int* start, int* end)
+int dequeue(int *queue, int *start, int *end, int *elementCount)
 {
-	if (isEmpty(queue, start, end))
+	if (isEmpty(start, end, elementCount))
 	{
-		fprintf(stderr, "%s\n", "Queue is empty, cannot dequeue.");
-		free(queue);
+		fprintf(stderr, "%s\n", "Queue is empty, cannot dequeue an element.");
 		exit(-1);
 	}
 
+	(*elementCount)--;
 	return queue[(*start)++];
 }
 
@@ -55,44 +66,78 @@ int peek(int* queue, int* start)
 void printQueue(int* queue, int start, int end)
 {
 	printf("\n%s\n", "Current queue: ");
-	for (int i = start; i < end; i++)
+
+	if (start >= end)
 	{
-		printf("%d\n", queue[i]);
+		for (int i = start; i < SIZE; i++)
+			printf("%d\n", queue[i]);
+
+		if (end == 0)
+			printf("%d\n", queue[end]);
+
+		else
+		{
+			for (int i = 0; i < end; i++)
+				printf("%d\n", queue[i]);
+		}
+	}
+
+	else
+	{
+		for (int i = start; i < end; i++)
+			printf("%d\n", queue[i]);
 	}
 
 	printf("\n");
 }
 
-// Initializes the physical size of the queue, the queue itself,
-// a variable indicating the current index of the start of the queue,
-// and a variable indicating the current index of the end of the queue.
-// Elements are enqueued, dequeued, and peeked on the queue.
+// Initializes the queue, a variable indicating the current index 
+// of the start of the queue, a variable indicating the current 
+// index of the end of the queue, and a variable indicating the 
+// number of elements in the queue. Elements are enqueued, dequeued, 
+// and peeked on the queue.
 int main(int argc, char const *argv[])
 {
-	int physical_size = 10;
-	int* queue = (int*) malloc(physical_size * sizeof(int));
+	int queue[SIZE];
 	int start = 0;
 	int end = 0;
+	int elementCount = 0;
 
-	if (queue == NULL)
+	for (int i = 1; i < 15; i++)
 	{
-		fprintf(stderr, "%s\n", "Not enough memory to allocate queue.");
-		free(queue);
-		exit(-1);
-	}
-
-	for (int i = 1; i < 13; i++)
-	{
-		enqueue(queue, &physical_size, &start, &end, i);
+		enqueue(queue, &start, &end, &elementCount, i);
 	}
 
 	printQueue(queue, start, end);
 
-	dequeue(queue, &start, &end);
-	dequeue(queue, &start, &end);
-	dequeue(queue, &start, &end);
+	dequeue(queue, &start, &end, &elementCount);
+	dequeue(queue, &start, &end, &elementCount);
+	dequeue(queue, &start, &end, &elementCount);
 
 	printQueue(queue, start, end);
+	printf("\n%d\n", peek(queue, &start));
 
+	enqueue(queue, &start, &end, &elementCount, 35);
+	enqueue(queue, &start, &end, &elementCount, 67);
+
+	printQueue(queue, start, end);
+	printf("\n%d\n", peek(queue, &start));
+
+	enqueue(queue, &start, &end, &elementCount, 109);
+	
+	printQueue(queue, start, end);
+
+	enqueue(queue, &start, &end, &elementCount, 109);
+	
+	printQueue(queue, start, end);
+
+	dequeue(queue, &start, &end, &elementCount);
+	
+	printQueue(queue, start, end);
+	printf("%d\n", peek(queue, &start));
+
+	enqueue(queue, &start, &end, &elementCount, 25);
+	
+	printQueue(queue, start, end);
 	printf("%d\n", peek(queue, &start));
 }
